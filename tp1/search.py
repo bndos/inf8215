@@ -75,7 +75,7 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
-def bfsDfsSearch(problem, fringe, toNode):
+def graphSearch(problem, fringe, toNode):
     visitedNodes = []
 
     # list of path of each visited node
@@ -124,7 +124,7 @@ def depthFirstSearch(problem):
         (state,)
     )
 
-    return bfsDfsSearch(problem, util.Stack(), toNode)
+    return graphSearch(problem, util.Stack(), toNode)
 
 
 def breadthFirstSearch(problem):
@@ -138,7 +138,7 @@ def breadthFirstSearch(problem):
         (state,)
     )
 
-    return bfsDfsSearch(problem, util.Queue(), toNode)
+    return graphSearch(problem, util.Queue(), toNode)
 
 
 def uniformCostSearch(problem):
@@ -153,7 +153,7 @@ def uniformCostSearch(problem):
         problem.getCostOfActions(state[1])
     )
 
-    return bfsDfsSearch(problem, util.PriorityQueue(), toNode)
+    return graphSearch(problem, util.PriorityQueue(), toNode)
 
 
 def nullHeuristic(state, problem=None):
@@ -170,7 +170,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 4 ICI
     """
 
-    util.raiseNotDefined()
+    toNode = lambda state: (
+        state,
+        problem.getCostOfActions(state[1]) +
+        heuristic(state[0], problem)
+    )
+
+    return graphSearch(problem, util.PriorityQueue(), toNode)
 
 
 # Abbreviations
