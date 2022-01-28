@@ -75,11 +75,13 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
-def bfsDfsSearch(problem, fringe):
+def bfsDfsSearch(problem, fringe, toNode):
     visitedNodes = []
 
     # list of path of each visited node
-    fringe.push((problem.getStartState(), []))  # node, path
+    fringe.push(*toNode(
+        (problem.getStartState(), [])
+    ))  # node, path
 
     while not fringe.isEmpty():
 
@@ -95,7 +97,7 @@ def bfsDfsSearch(problem, fringe):
 
             for successor, direction, _ in successors:
                 if successor not in visitedNodes:
-                    fringe.push((successor, [*path, direction]))
+                    fringe.push(*toNode((successor, [*path, direction])))
     return []
 
 
@@ -118,7 +120,11 @@ def depthFirstSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
     """
 
-    return bfsDfsSearch(problem, util.Stack())
+    toNode = lambda state: (
+        (state,)
+    )
+
+    return bfsDfsSearch(problem, util.Stack(), toNode)
 
 
 def breadthFirstSearch(problem):
@@ -128,7 +134,11 @@ def breadthFirstSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
     """
 
-    return bfsDfsSearch(problem, util.Queue())
+    toNode = lambda state: (
+        (state,)
+    )
+
+    return bfsDfsSearch(problem, util.Queue(), toNode)
 
 
 def uniformCostSearch(problem):
@@ -138,31 +148,12 @@ def uniformCostSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 3 ICI
     """
 
-    visitedNodes = []
-    fringe = util.PriorityQueue()
+    toNode = lambda state: (
+        state,
+        problem.getCostOfActions(state[1])
+    )
 
-    # list of path of each visited node
-    fringe.push((problem.getStartState(), []), 0)  # node, path
-
-    while not fringe.isEmpty():
-
-        s, path = fringe.pop()
-
-        if problem.isGoalState(s):
-            return path
-
-        elif s not in visitedNodes:
-
-            successors = problem.getSuccessors(s)
-            visitedNodes.append(s)
-
-            for successor, direction, _ in successors:
-                if successor not in visitedNodes:
-                    newPath = [*path, direction]
-                    fringe.push(
-                        (successor, newPath), problem.getCostOfActions(newPath),
-                    )
-    return []
+    return bfsDfsSearch(problem, util.PriorityQueue(), toNode)
 
 
 def nullHeuristic(state, problem=None):
