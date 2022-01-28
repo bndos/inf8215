@@ -98,6 +98,7 @@ def bfsDfsSearch(problem, fringe):
                     fringe.push((successor, [*path, direction]))
     return []
 
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -119,6 +120,7 @@ def depthFirstSearch(problem):
 
     return bfsDfsSearch(problem, util.Stack())
 
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
 
@@ -136,7 +138,31 @@ def uniformCostSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 3 ICI
     """
 
-    util.raiseNotDefined()
+    visitedNodes = []
+    fringe = util.PriorityQueue()
+
+    # list of path of each visited node
+    fringe.push((problem.getStartState(), []), 0)  # node, path
+
+    while not fringe.isEmpty():
+
+        s, path = fringe.pop()
+
+        if problem.isGoalState(s):
+            return path
+
+        elif s not in visitedNodes:
+
+            successors = problem.getSuccessors(s)
+            visitedNodes.append(s)
+
+            for successor, direction, _ in successors:
+                if successor not in visitedNodes:
+                    newPath = [*path, direction]
+                    fringe.push(
+                        (successor, newPath), problem.getCostOfActions(newPath),
+                    )
+    return []
 
 
 def nullHeuristic(state, problem=None):
