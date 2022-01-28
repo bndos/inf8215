@@ -369,10 +369,13 @@ class CornersProblem(search.SearchProblem):
 
 def getClosestCorner(position, corners):
 
-    cornersDistances = [util.manhattanDistance(position,corner) for corner in corners]
-    minIndex = cornersDistances.index(min(cornersDistances))
+    cornersDistances = [(util.manhattanDistance(position,corner), corner)
+                        for corner in corners]
 
-    return corners[minIndex], cornersDistances[minIndex]
+    minDistance, minCorner = min(cornersDistances)
+    print(minCorner, minDistance)
+
+    return minCorner, minDistance
 
 
 def cornersHeuristic(state, problem):
