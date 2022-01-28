@@ -305,8 +305,8 @@ class CornersProblem(search.SearchProblem):
         '''
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
-        
-        util.raiseNotDefined()
+
+        return (self.startingPosition, set(self.corners))
 
     def isGoalState(self, state):
         """
@@ -317,7 +317,10 @@ class CornersProblem(search.SearchProblem):
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
 
-        util.raiseNotDefined()
+        _, corners = state
+
+        return len(corners) == 0
+
 
     def getSuccessors(self, state):
         """
