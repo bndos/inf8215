@@ -373,7 +373,15 @@ def getClosestCorner(position, corners):
                         for corner in corners]
 
     minDistance, minCorner = min(cornersDistances)
-    print(minCorner, minDistance)
+
+    return minCorner, minDistance
+
+def getFarest(position, corners):
+
+    cornersDistances = [(util.manhattanDistance(position,corner), corner)
+                        for corner in corners]
+
+    minDistance, minCorner = max(cornersDistances)
 
     return minCorner, minDistance
 
@@ -506,5 +514,19 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     '''
 
 
-    return 0
 
+    foodPositions = foodGrid.asList().copy()
+
+    if len(foodPositions) == 0:
+        return 0
+
+    closestFood, _ = getClosestCorner(position, foodPositions)
+    distanceClosestFood = astarDistance(position, closestFood, problem.startingGameState)
+    farestFood, _ = getFarest(closestFood, foodPositions)
+    distanceFarFood = astarDistance(closestFood, farestFood, problem.startingGameState)
+
+    return distanceClosestFood + distanceFarFood
+
+def astarDistance(start, end, gameState):
+    problem = PositionSearchProblem(gameState, start=start, goal=end, warn=False, visualize=False)
+    return problem.getCostOfActions(search.astar(problem, heuristic=manhattanHeuristic))
