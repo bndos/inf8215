@@ -18,7 +18,9 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 """
 
 from quoridor import *
+
 import math
+import time
 
 
 class MyAgent(Agent):
@@ -45,13 +47,13 @@ class MyAgent(Agent):
         print("percept:", percepts)
         print("player:", player)
         print("step:", step)
-        print("time left:", time_left if time_left else '+inf')
+        print("time left:", time_left if time_left else "+inf")
 
         board = dict_to_board(percepts)
 
         # TODO: implement your agent and return an action for the current step.
         if time_left >= 45 and board.nb_walls[player] > 0:
-            value, action = self.minimax(board, player, step,time_left)
+            value, action = self.minimax(board, player, step, time_left)
             print(value, action)
         # No more walls or time is running out
         else:
@@ -61,18 +63,138 @@ class MyAgent(Agent):
                 print("NO PATH")
                 return None
 
-            action = ('P', x, y)
+            action = ("P", x, y)
 
         return action
 
-    def minimax(self, state: Board, alpha: int, beta: int, depth: int):
-        return self.max_value(state, -float("inf"), float("inf"), 0)
+    def cutoff(self, step, depth, start_time, time_left):
+        current_time = time.time()
+        # 5 seconds to search
+        if current_time - start_time >= 5:
+            return True
+        # Reduce depth at the start or end of the game
+        if step < 7 or time_left < 100:
+            return depth >= 2
+        return depth > 25
 
-    def max_value(self, state: Board, alpha, beta, depth: int):
-        pass
+    def minimax(self, state: Board, player, step, time_left):
+        start = time.time()
+        return self.max_value(
+            state, player, step, start, time_left, -float("inf"), float("inf"), 0
+        )
 
-    def min_value(self, state: Board, alpha, beta, depth: int):
-        pass
+    def max_value(
+        self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
+    ):
+        if self.cutoff(step, depth, start_time, time_left):
+            return self.estimate_score(state, state, player), None
+
+        if state.is_finished():
+            return state.get_score(player), None
+
+        v_star = -math.inf
+        m_star = None
+        for action in self.filter_actions(state, state, player):
+            clone = state.clone()
+            clone.play_action(action, player)
+            next_state = clone
+            v, _ = self.min_value(
+                next_state, player, step, start_time, time_left, alpha, beta, depth + 1
+            )
+            if v > v_star:
+                v_star = v
+                m_star = action
+                alpha = max(alpha, v_star)
+            if v >= beta:
+                return v_star, m_star
+        return v_star, m_star
+
+    def min_value(
+        self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
+    ):
+        if self.cutoff(step, depth, start_time, time_left):
+            return self.estimate_score(state, state, player), None
+
+        if state.is_finished():
+            return state.get_score(player), None
+
+        v_star = math.inf
+        m_star = None
+        for action in self.filter_actions(state, state, player):
+            clone = state.clone()
+            clone.play_action(action, player)
+            next_state = clone
+            v, _ = self.max_value(
+                next_state, player, step, start_time, time_left, alpha, beta, depth + 1
+            )
+            if v < v_star:
+                v_star = v
+                m_star = action
+                beta = min(beta, v_star)
+            if v <= alpha:
+                return v_star, m_star
+        return v_star, m_star
+
+    def manhattan(self, pos1, pos2):
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+
+    def filter_wall_moves(self, wall_moves, state: Board, other_player):
+        best_wall_moves = []
+        position_opponent = state.pawns[other_player]
+        for wall_move in wall_moves:
+            (_, x, y) = wall_move
+            # Walls close to opponent
+            position_from_opponent = self.manhattan([x, y], position_opponent)
+            if position_from_opponent <= 3:
+                best_wall_moves.append(wall_move)
+        return best_wall_moves
+
+    # TODO: CHECK AVEC YUHAN_PLAYER, ameliorer
+    def filter_actions(self, game, state: Board, player):
+        # all_actions = state.get_actions(player)
+        actions_to_explore = []
+        all_pawn_moves = state.get_legal_pawn_moves(player)
+        all_wall_moves = state.get_legal_wall_moves(player)
+
+        opponent = (player + 1) % 2
+
+        actions_to_explore.extend(
+            self.filter_wall_moves(all_wall_moves, state, opponent)
+        )
+        actions_to_explore.extend(all_pawn_moves)
+
+        return actions_to_explore
+
+    def estimate_score(self, game: Board, state: Board, player):
+        opponent = (player + 1) % 2
+        try:
+            # difference between lengths of my shortest path and of my opponent
+            # my_score = 10*state.get_score(player)
+            my_score = 100 / max(state.min_steps_before_victory(player), 0.001)
+            my_score -= 100 / (max(state.min_steps_before_victory(opponent), 0.01) ** 2)
+        except NoPath:
+            print("NO PATH estimate_score")
+            my_score = float("inf")
+
+        # Consider the remaining walls of each player
+        my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
+
+        # If no walls left and player lost
+        # TODO: TEST POUR VOIR SI CEST UTILES
+        # if game.nb_walls[player] == 0 and my_score < 0:
+        #     my_score -= 100
+        # if game.nb_walls[opponent] == 0 and my_score > 0:
+        #     my_score += 100
+
+        # Consider if our agents wins or loses
+        if state.pawns[player][0] == state.goals[player]:
+            my_score += 100000000
+        elif state.pawns[opponent][0] == state.goals[opponent]:
+            my_score -= 100000000
+        print(my_score)
+
+        return my_score
+
 
 if __name__ == "__main__":
     agent_main(MyAgent())
