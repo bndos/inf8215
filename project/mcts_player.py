@@ -29,7 +29,7 @@ class MyAgent(Agent):
     """My Quoridor agent."""
 
     def __init__(self):
-        self.mcts = MCTS({"num_simulations": 50})
+        self.mcts = MCTS({"num_simulations": 100})
 
     def play(self, percepts, player, step, time_left):
         """
@@ -88,7 +88,8 @@ class MCTS:
     def manhattan(self, pos1, pos2):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
-    def get_valid_wall_moves(self, wall_moves, state: Board, other_player):
+    def get_valid_wall_moves(self, state: Board, other_player):
+        wall_moves = state.get_legal_wall_moves((other_player + 1) % 2)
         best_wall_moves = []
         position_opponent = state.pawns[other_player]
         for wall_move in wall_moves:
@@ -101,19 +102,39 @@ class MCTS:
 
     def get_valid_actions(self, state: Board, player):
         # all_actions = state.get_actions(player)
-        actions_to_explore = []
-        all_pawn_moves = state.get_legal_pawn_moves(player)
-        all_wall_moves = state.get_legal_wall_moves(player)
+        if state.is_finished():
+            return []
 
+        actions_to_explore = []
         opponent = (player + 1) % 2
 
-        actions_to_explore.extend(all_pawn_moves)
+        if (
+            abs(state.pawns[opponent][0] - state.goals[opponent]) != 1
+            and state.nb_walls[player]
+        ):
+            all_pawn_moves = state.get_legal_pawn_moves(player)
 
-        actions_to_explore.extend(
-            self.get_valid_wall_moves(all_wall_moves, state, opponent)
-        )
+            actions_to_explore.extend(all_pawn_moves)
+
+        actions_to_explore.extend(self.get_valid_wall_moves(state, opponent))
 
         return actions_to_explore
+
+    def get_random_action(self, state: Board, player):
+        # actions = self.get_valid_actions(state, player)
+        opponent = (player + 1) % 2
+
+        if (
+            abs(state.pawns[opponent][0] - state.goals[opponent]) == 1
+            and state.nb_walls[player]
+        ):
+            actions = self.get_valid_wall_moves(state, opponent)
+            if len(actions):
+                return random.choice(actions)
+
+        (x, y) = state.get_shortest_path(player)[0]
+        return ("P", x, y)
+        # return random.choice(actions)
 
     def get_reward(self, state: Board, player):
         opponent = (player + 1) % 2
@@ -133,7 +154,8 @@ class MCTS:
         action_probs = {move: 0 for move in valid_moves}
         root.expand(action_probs)
 
-        for indx in range(self.args["num_simulations"]):
+        for i in range(self.args["num_simulations"]):
+            # print(i)
             next_node = root
             search_path = [next_node]
 
@@ -142,21 +164,33 @@ class MCTS:
                 _, next_node = next_node.select_child()
                 search_path.append(next_node)
 
-            # SELECT
-
-            # The value of the new state from the perspective of the other player
             reward = self.get_reward(next_node.state, player=root.to_play)
             if not reward:
                 # If the game has not ended:
                 # EXPAND
-                valid_moves = self.get_valid_actions(
-                    next_node.state, next_node.to_play
-                )
-                action_probs = {move: 0 for move in valid_moves}
-                next_node.expand(action_probs)
+                if next_node.visit_count > 0:
+                    valid_moves = self.get_valid_actions(
+                        next_node.state, next_node.to_play
+                    )
+                    action_probs = {move: 0 for move in valid_moves}
+                    next_node.expand(action_probs)
 
-            self.backpropagate(search_path, reward, next_node.to_play)
+                # SIMULATION
+                simulation_state = next_node.state.clone()
+                simulation_player = next_node.to_play
+                while not reward:
+                    simulation_state = simulation_state.play_action(
+                        self.get_random_action(simulation_state, simulation_player),
+                        simulation_player,
+                    )
+                    reward = self.get_reward(simulation_state, player=root.to_play)
+                    simulation_player = (simulation_player + 1) % 2
 
+                self.backpropagate(search_path, reward, next_node.to_play)
+            else:
+                self.backpropagate(search_path, reward, next_node.to_play)
+
+            # print([child.value() for child in search_path])
         return root.next_move()
 
     def backpropagate(self, search_path, value, to_play):
@@ -216,22 +250,18 @@ class Node:
         """
         The score for an action that would transition between the parent and child.
         """
-        prior_score = (
-            child.prior * math.sqrt(parent.visit_count) / (child.visit_count + 1)
-        )
-        if child.visit_count > 0:
-            # The value of the child is from the perspective of the opposing player
-            value_score = -child.value()
-        else:
-            value_score = 0
+        if not parent.value() or not child.value():
+            return 0
 
-        return value_score + prior_score
+        prior_score = 2 * math.sqrt(math.log(parent.visit_count)) / (child.visit_count)
+
+        return child.value() + prior_score
 
     def select_child(self):
         """
         Select the child with the highest UCB score.
         """
-        best_score = -np.inf
+        best_score = -math.inf
         best_action = -1
         best_child = None
 
