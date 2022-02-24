@@ -94,7 +94,7 @@ class MyAgent(Agent):
 
         v_star = -math.inf
         m_star = None
-        for action in self.filter_actions(state, state, player):
+        for action in self.filter_actions(state, player):
             clone = state.clone()
             clone.play_action(action, player)
             next_state = clone
@@ -120,7 +120,7 @@ class MyAgent(Agent):
 
         v_star = math.inf
         m_star = None
-        for action in self.filter_actions(state, state, player):
+        for action in self.filter_actions(state, player):
             clone = state.clone()
             clone.play_action(action, player)
             next_state = clone
@@ -149,8 +149,7 @@ class MyAgent(Agent):
                 best_wall_moves.append(wall_move)
         return best_wall_moves
 
-    # TODO: CHECK AVEC YUHAN_PLAYER, ameliorer
-    def filter_actions(self, game, state: Board, player):
+    def filter_actions(self, state: Board, player):
         # all_actions = state.get_actions(player)
         actions_to_explore = []
         all_pawn_moves = state.get_legal_pawn_moves(player)
@@ -168,25 +167,14 @@ class MyAgent(Agent):
     def evaluate(self, game: Board, state: Board, player):
         opponent = (player + 1) % 2
         try:
-            # difference between lengths of my shortest path and of my opponent
-            # my_score = 10*state.get_score(player)
             my_score = 100 / max(state.min_steps_before_victory(player), 0.001)
             my_score -= 100 / (max(state.min_steps_before_victory(opponent), 0.01) ** 2)
         except NoPath:
             print("NO PATH estimate_score")
             my_score = float("inf")
 
-        # Consider the remaining walls of each player
         my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
 
-        # If no walls left and player lost
-        # TODO: TEST POUR VOIR SI CEST UTILES
-        # if game.nb_walls[player] == 0 and my_score < 0:
-        #     my_score -= 100
-        # if game.nb_walls[opponent] == 0 and my_score > 0:
-        #     my_score += 100
-
-        # Consider if our agents wins or loses
         if state.pawns[player][0] == state.goals[player]:
             my_score += 100000000
         elif state.pawns[opponent][0] == state.goals[opponent]:
