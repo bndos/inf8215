@@ -27,8 +27,9 @@ import numpy as np
 class MyAgent(Agent):
 
     """My Quoridor agent."""
+
     def __init__(self):
-        self.mcts = MCTS({"num_simulations" : 10000})
+        self.mcts = MCTS({"num_simulations": 50})
 
     def play(self, percepts, player, step, time_left):
         """
@@ -57,7 +58,6 @@ class MyAgent(Agent):
         # TODO: implement your agent and return an action for the current step.
         if time_left >= 45 and board.nb_walls[player] > 0:
             action = self.mcts.run(board, player)
-            print(action)
         # No more walls or time is running out
         else:
             try:
@@ -107,10 +107,11 @@ class MCTS:
 
         opponent = (player + 1) % 2
 
+        actions_to_explore.extend(all_pawn_moves)
+
         actions_to_explore.extend(
             self.get_valid_wall_moves(all_wall_moves, state, opponent)
         )
-        actions_to_explore.extend(all_pawn_moves)
 
         return actions_to_explore
 
@@ -125,39 +126,36 @@ class MCTS:
 
     def run(self, state, to_play):
 
-        root = Node(0, to_play)
+        root = Node(state, 0, to_play)
 
         # EXPAND root
         valid_moves = self.get_valid_actions(state, to_play)
-        action_probs = { move : 0 for move in valid_moves }
-        root.expand(state.clone(), to_play, action_probs)
+        action_probs = {move: 0 for move in valid_moves}
+        root.expand(action_probs)
 
-        for _ in range(self.args["num_simulations"]):
-            node = root
-            search_path = [node]
+        for indx in range(self.args["num_simulations"]):
+            next_node = root
+            search_path = [next_node]
 
             # SELECT
-            while node.expanded():
-                action, node = node.select_child()
-                search_path.append(node)
+            while next_node.expanded():
+                _, next_node = next_node.select_child()
+                search_path.append(next_node)
 
-            parent = search_path[-2]
-            state = parent.state
-            state_clone = state.clone()
-            # Now we're at a leaf node and we would like to expand
-            # Players always play from their own perspective
-            next_state = state_clone.play_action(action, parent.to_play)
+            # SELECT
 
             # The value of the new state from the perspective of the other player
-            value = self.get_reward(next_state, player=1)
-            if value is None:
+            reward = self.get_reward(next_node.state, player=root.to_play)
+            if not reward:
                 # If the game has not ended:
                 # EXPAND
-                valid_moves = self.get_valid_actions(state, to_play)
-                action_probs = { move : 0 for move in valid_moves }
-                node.expand(next_state, (parent.to_play + 1) % 2, action_probs)
+                valid_moves = self.get_valid_actions(
+                    next_node.state, next_node.to_play
+                )
+                action_probs = {move: 0 for move in valid_moves}
+                next_node.expand(action_probs)
 
-            self.backpropagate(search_path, value, (parent.to_play + 1) % 2)
+            self.backpropagate(search_path, reward, next_node.to_play)
 
         return root.next_move()
 
@@ -172,13 +170,13 @@ class MCTS:
 
 
 class Node:
-    def __init__(self, prior, to_play):
+    def __init__(self, state, prior, to_play):
         self.visit_count = 0
         self.to_play = to_play
         self.prior = prior
         self.value_sum = 0
         self.children = {}
-        self.state = None
+        self.state = state
 
     def expanded(self):
         return len(self.children) > 0
@@ -187,6 +185,12 @@ class Node:
         if self.visit_count == 0:
             return 0
         return self.value_sum / self.visit_count
+
+    def next_state(self, action):
+        state_clone = self.state.clone()
+        next_state = state_clone.play_action(action, self.to_play)
+
+        return next_state
 
     def select_action(self, temperature):
         """
@@ -212,7 +216,9 @@ class Node:
         """
         The score for an action that would transition between the parent and child.
         """
-        prior_score = child.prior * math.sqrt(parent.visit_count) / (child.visit_count + 1)
+        prior_score = (
+            child.prior * math.sqrt(parent.visit_count) / (child.visit_count + 1)
+        )
         if child.visit_count > 0:
             # The value of the child is from the perspective of the opposing player
             value_score = -child.value()
@@ -251,17 +257,17 @@ class Node:
                 max_visits = visit_count
                 best_action = action
 
-        print(self.children)
+        # print([ child.visit_count for _, child in self.children.items()])
         return best_action
 
-    def expand(self, state, to_play, action_probs):
+    def expand(self, action_probs):
         """
         We expand a node and keep track of the prior policy probability given by neural network
         """
-        self.to_play = to_play
-        self.state = state
         for action, prob in action_probs.items():
-            self.children[action] = Node(prior=prob, to_play=(self.to_play + 1) % 2)
+            self.children[action] = Node(
+                self.next_state(action), prior=prob, to_play=(self.to_play + 1) % 2
+            )
 
     def __repr__(self):
         """
