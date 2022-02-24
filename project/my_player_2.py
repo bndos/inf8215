@@ -52,9 +52,9 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
 
         # TODO: implement your agent and return an action for the current step.
+        print(board.pawns[player])
         if time_left >= 45 and board.nb_walls[player] > 0:
             value, action = self.minimax(board, player, step, time_left)
-            print(value, action)
         # No more walls or time is running out
         else:
             try:
@@ -213,7 +213,7 @@ class MyAgent(Agent):
 
         my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
 
-        my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+        my_score += 16 * (state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1])
         # my_score -= state.pawns[player][1] - state.get_shortest_path(player)[-1][1]
 
         if state.pawns[player][0] == state.goals[player]:
@@ -223,7 +223,6 @@ class MyAgent(Agent):
             and state.nb_walls[player]
         ):
             my_score -= 100000000
-        print(my_score)
 
         return my_score
 
