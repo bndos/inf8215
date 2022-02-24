@@ -175,9 +175,15 @@ class MyAgent(Agent):
 
         my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
 
+        my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+        # my_score -= state.pawns[player][1] - state.get_shortest_path(player)[-1][1]
+
         if state.pawns[player][0] == state.goals[player]:
             my_score += 100000000
-        elif state.pawns[opponent][0] == state.goals[opponent]:
+        elif (
+            abs(state.pawns[opponent][0] - state.goals[opponent]) <= 1
+            and state.nb_walls[player]
+        ):
             my_score -= 100000000
         print(my_score)
 
