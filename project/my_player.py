@@ -141,11 +141,13 @@ class MyAgent(Agent):
     def filter_wall_moves(self, wall_moves, state: Board, other_player):
         best_wall_moves = []
         position_opponent = state.pawns[other_player]
+        position_player = state.pawns[(other_player + 1) % 2]
         for wall_move in wall_moves:
             (_, x, y) = wall_move
             # Walls close to opponent
-            position_from_opponent = self.manhattan([x, y], position_opponent)
-            if position_from_opponent <= 3:
+            distance_from_opponent = self.manhattan([x, y], position_opponent)
+            distance_from_player = self.manhattan([x, y], position_player)
+            if distance_from_opponent <= 3 or distance_from_player <= 2:
                 best_wall_moves.append(wall_move)
         return best_wall_moves
 
@@ -185,7 +187,7 @@ class MyAgent(Agent):
             and state.nb_walls[player]
         ):
             my_score -= 100000000
-        print(my_score)
+        # print(my_score)
 
         return my_score
 
