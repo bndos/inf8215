@@ -87,7 +87,7 @@ class MyAgent(Agent):
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
         if self.cutoff(step, depth, start_time, time_left):
-            return self.estimate_score(state, state, player), None
+            return self.evaluate(state, state, player), None
 
         if state.is_finished():
             return state.get_score(player), None
@@ -113,7 +113,7 @@ class MyAgent(Agent):
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
         if self.cutoff(step, depth, start_time, time_left):
-            return self.estimate_score(state, state, player), None
+            return self.evaluate(state, state, player), None
 
         if state.is_finished():
             return state.get_score(player), None
@@ -165,7 +165,7 @@ class MyAgent(Agent):
 
         return actions_to_explore
 
-    def estimate_score(self, game: Board, state: Board, player):
+    def evaluate(self, game: Board, state: Board, player):
         opponent = (player + 1) % 2
         try:
             # difference between lengths of my shortest path and of my opponent
