@@ -13,3 +13,7 @@ solve minimize x[5]^2;
 output [
   show(x)
 ];
+
+% Answer
+
+% [10, 10, 10, 10, 20]
