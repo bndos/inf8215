@@ -32,18 +32,18 @@ constraint forall(i in 1..P)(count(opponents[i, 1..P], 0) == 0);
 
 % chaque joueur doit avoir fait entre 8 et 11 matchs
 constraint forall(i in 1..P)(played[i] = count(sites[1..T, i], 1) + count(sites[1..T, i], 1));
-constraint forall(i in 1..P)(8 <= played[i]  /\ played[i] <= 11);
+constraint forall(i in 1..P)(played[i] >= 8  /\ played[i] <= 11);
 
 % chaque joueur doit avoir joué au moins une fois sur chaque site
-constraint forall(i in 1..P, j in 1..G)(j in sites[1..T, i]);
+constraint forall(p in 1..P, g in 1..G)(g in sites[1..T, p]);
 
 % un joueur ne peut jouer qu’un seul des 2 matchs par jour
 % // assurer par la représentation //
 
 % au moins une journée de repos entre deux matchs si ceux-ci ne sont pas dans la même ville
-constraint forall(i in 1..P, j in 1..(T - 1))(
-  if sites[j, i] != 0 then
-     sites[i, j] == sites[j + 1, i] \/ sites[j + 1, i] == 0 endif
+constraint forall(p in 1..P, t in 1..(T - 1))(
+  if sites[t, p] != 0 then
+     sites[p, t] == sites[t + 1, p] \/ sites[t + 1, p] == 0 endif
 );
 
 solve satisfy;
