@@ -31,8 +31,8 @@ constraint forall(p in 1..P, p2 in 1..P)(
 constraint forall(i in 1..P)(count(opponents[i, 1..P], 0) == 0);
 
 % chaque joueur doit avoir fait entre 8 et 11 matchs
-constraint forall(i in 1..P)(played[i] = T - count(sites[1..T, i], 0));
-constraint forall(i in 1..P)(played[i] >= 8  /\ played[i] <= 11);
+constraint forall(i in 1..P)(played[i] = count(sites[1..T, i], 1) + count(sites[1..T, i], 1));
+constraint forall(i in 1..P)(8 <= played[i]  /\ played[i] <= 11);
 
 % chaque joueur doit avoir joué au moins une fois sur chaque site
 constraint forall(i in 1..P, j in 1..G)(j in sites[1..T, i]);
