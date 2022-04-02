@@ -53,6 +53,7 @@ class MyAgent(Agent):
 
         # TODO: implement your agent and return an action for the current step.
         if time_left >= 45 and board.nb_walls[player] > 0:
+            print(time_left)
             value, action = self.minimax(board, player, step, time_left)
             print(value, action)
         # No more walls or time is running out
@@ -87,14 +88,14 @@ class MyAgent(Agent):
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
         if self.cutoff(step, depth, start_time, time_left):
-            return self.evaluate(state, state, player), None
+            return self.evaluate(state, player), None
 
         if state.is_finished():
             return state.get_score(player), None
 
         v_star = -math.inf
         m_star = None
-        for action in self.filter_actions(state, player):
+        for action in self.get_actions(state, player):
             clone = state.clone()
             clone.play_action(action, player)
             next_state = clone
@@ -113,14 +114,14 @@ class MyAgent(Agent):
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
         if self.cutoff(step, depth, start_time, time_left):
-            return self.evaluate(state, state, player), None
+            return self.evaluate(state, player), None
 
         if state.is_finished():
             return state.get_score(player), None
 
         v_star = math.inf
         m_star = None
-        for action in self.filter_actions(state, player):
+        for action in self.get_actions(state, player):
             clone = state.clone()
             clone.play_action(action, player)
             next_state = clone
@@ -138,36 +139,37 @@ class MyAgent(Agent):
     def manhattan(self, pos1, pos2):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
-    def filter_wall_moves(self, wall_moves, state: Board, other_player):
+    def get_wall_moves(self, state: Board, player):
+
         best_wall_moves = []
-        position_opponent = state.pawns[other_player]
-        position_player = state.pawns[(other_player + 1) % 2]
-        for wall_move in wall_moves:
+        position_player = state.pawns[player]
+        position_opponent = state.pawns[not player]
+        all_wall_moves = state.get_legal_wall_moves(player)
+
+        for wall_move in all_wall_moves:
             (_, x, y) = wall_move
             # Walls close to opponent
             distance_from_opponent = self.manhattan([x, y], position_opponent)
             distance_from_player = self.manhattan([x, y], position_player)
-            if distance_from_opponent <= 3 or distance_from_player <= 2:
+            if distance_from_opponent <= 3 or distance_from_player <= 3:
                 best_wall_moves.append(wall_move)
         return best_wall_moves
 
-    def filter_actions(self, state: Board, player):
+    def get_actions(self, state: Board, player):
         # all_actions = state.get_actions(player)
         actions_to_explore = []
         all_pawn_moves = state.get_legal_pawn_moves(player)
-        all_wall_moves = state.get_legal_wall_moves(player)
-
-        opponent = (player + 1) % 2
 
         actions_to_explore.extend(
-            self.filter_wall_moves(all_wall_moves, state, opponent)
+            self.get_wall_moves(state, player)
         )
+
         actions_to_explore.extend(all_pawn_moves)
 
         return actions_to_explore
 
-    def evaluate(self, game: Board, state: Board, player):
-        opponent = (player + 1) % 2
+    def evaluate(self, state: Board, player):
+        opponent = not player
         try:
             my_score = 100 / max(state.min_steps_before_victory(player), 0.001)
             my_score -= 100 / (max(state.min_steps_before_victory(opponent), 0.01) ** 2)
