@@ -142,6 +142,7 @@ class MyAgent(Agent):
     def get_wall_moves(self, state: Board, player):
 
         best_wall_moves = []
+        opponent_wall_moves = []
         position_player = state.pawns[player]
         position_opponent = state.pawns[not player]
         all_wall_moves = state.get_legal_wall_moves(player)
@@ -151,18 +152,23 @@ class MyAgent(Agent):
             # Walls close to opponent
             distance_from_opponent = self.manhattan([x, y], position_opponent)
             distance_from_player = self.manhattan([x, y], position_player)
-            if distance_from_opponent <= 3 or distance_from_player <= 3:
+
+            if distance_from_opponent <= 3:
+                opponent_wall_moves.append(wall_move)
                 best_wall_moves.append(wall_move)
-        return best_wall_moves
+            if distance_from_player <= 3:
+                best_wall_moves.append(wall_move)
+
+        return best_wall_moves, opponent_wall_moves
 
     def get_actions(self, state: Board, player):
         # all_actions = state.get_actions(player)
         actions_to_explore = []
         all_pawn_moves = state.get_legal_pawn_moves(player)
 
-        actions_to_explore.extend(
-            self.get_wall_moves(state, player)
-        )
+        best_wall_moves, _ = self.get_wall_moves(state, player)
+
+        actions_to_explore.extend(best_wall_moves)
 
         actions_to_explore.extend(all_pawn_moves)
 
