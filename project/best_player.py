@@ -58,15 +58,11 @@ class MyAgent(Agent):
         if (
             time_left >= 45 or player_min_steps > opponent_min_steps
         ) and board.nb_walls[player] > 0:
-            print(time_left)
-            value, action = self.minimax(board, player, step, time_left)
-            print(value, action)
-        # No more walls or time is running out
+            action = self.minimax(board, player, step, time_left)
         else:
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
-                print("NO PATH")
                 return None
 
             action = ("P", x, y)
@@ -155,7 +151,6 @@ class MyAgent(Agent):
 
         for wall_move in all_wall_moves:
             (_, x, y) = wall_move
-            # Walls close to opponent
             distance_from_opponent = self.manhattan([x, y], position_opponent)
             distance_from_player = self.manhattan([x, y], position_player)
 
@@ -168,7 +163,6 @@ class MyAgent(Agent):
         return best_wall_moves, opponent_wall_moves
 
     def get_actions(self, state: Board, player):
-        # all_actions = state.get_actions(player)
         actions_to_explore = []
         all_pawn_moves = state.get_legal_pawn_moves(player)
 
@@ -195,13 +189,11 @@ class MyAgent(Agent):
         my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
 
         my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
-        # my_score -= state.pawns[player][1] - state.get_shortest_path(player)[-1][1]
 
         if state.pawns[player][0] == state.goals[player]:
             return float("inf")
         elif state.pawns[opponent][0] == state.goals[opponent]:
             return -float("inf")
-        # print(my_score)
 
         return my_score
 
