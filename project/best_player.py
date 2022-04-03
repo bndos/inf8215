@@ -59,21 +59,29 @@ class MyAgent(Agent):
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
-                print("NO PATH 1 play()")
-                return board.get_legal_pawn_moves(player)[0]
+                actions = list(board.get_actions(player))
+                return random.choice(actions)
             return ("P", x, y)
         if (
             time_left >= 45 or player_min_steps > opponent_min_steps
         ) and board.nb_walls[player] > 0:
             _, action = self.minimax(board, player, step, time_left)
+
         else:
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
-                return board.get_legal_pawn_moves(player)[0]
+                actions = list(board.get_actions(player))
+                return random.choice(actions)
 
             action = ("P", x, y)
 
+        print("action", action)
+
+        if not board.is_action_valid(action, player):
+            print("illegal: ", action)
+            actions = list(board.get_actions(player))
+            return random.choice(actions)
         return action
 
     def treshold(self, step, depth, start_time):
@@ -148,23 +156,52 @@ class MyAgent(Agent):
     def manhattan(self, pos1, pos2):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
+    def coord_in_path(self, x, y, shortest_path):
+        if not len(shortest_path):
+            return False
+        return (
+            (x, y) in shortest_path
+            or (x + 1, y) in shortest_path
+            or (x, y + 1) in shortest_path
+            or (x + 1, y + 1) in shortest_path
+            or (x - 1, y) in shortest_path
+            or (x, y - 1) in shortest_path
+            or (x - 1, y - 1) in shortest_path
+            or (x - 1, y + 1) in shortest_path
+            or (x + 1, y - 1) in shortest_path
+        )
+
     def get_wall_moves(self, state: Board, player):
 
         best_wall_moves = []
         opponent_wall_moves = []
+        opponent = not player
+
         position_player = state.pawns[player]
-        position_opponent = state.pawns[not player]
+        position_opponent = state.pawns[opponent]
+        try:
+            opponent_path = state.get_shortest_path(opponent)
+        except:
+            opponent_path = []
+        try:
+            player_path = state.get_shortest_path(player)
+        except:
+            player_path = []
+
         all_wall_moves = state.get_legal_wall_moves(player)
 
         for wall_move in all_wall_moves:
             (_, x, y) = wall_move
+
             distance_from_opponent = self.manhattan([x, y], position_opponent)
             distance_from_player = self.manhattan([x, y], position_player)
 
-            if distance_from_opponent <= 3:
-                opponent_wall_moves.append(wall_move)
-                best_wall_moves.append(wall_move)
-            if distance_from_player <= 3:
+            if (
+                distance_from_opponent <= 3
+                or self.coord_in_path(x, y, opponent_path)
+                or distance_from_player <= 3
+                or self.coord_in_path(x, y, player_path)
+            ):
                 best_wall_moves.append(wall_move)
 
         return best_wall_moves, opponent_wall_moves
@@ -187,8 +224,10 @@ class MyAgent(Agent):
         try:
             player_min_steps = state.min_steps_before_victory(player)
             opponent_min_steps = state.min_steps_before_victory(opponent)
-            my_score = 100 / max(player_min_steps, 0.001)
-            my_score -= 100 / (max(opponent_min_steps, 0.01) ** 2)
+            my_score = 50 * state.get_score(player)
+            my_score += (
+                state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+            ) ** 2
         except NoPath:
             print("NO PATH estimate_score")
             return -float("inf")
@@ -199,9 +238,6 @@ class MyAgent(Agent):
             return -float("inf")
 
         my_score += state.nb_walls[player] - state.nb_walls[opponent]
-
-        my_score += 2 * (state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1])
-        my_score += opponent_min_steps - player_min_steps
 
         return my_score
 
