@@ -191,9 +191,10 @@ class MyAgent(Agent):
         elif state.pawns[opponent][0] == state.goals[opponent]:
             return -float("inf")
 
-        my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
-        my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
-        my_score -= state.pawns[player][1] - state.get_shortest_path(player)[-1][1]
+        my_score += state.nb_walls[player] - state.nb_walls[opponent]
+
+        # my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+        my_score += opponent_min_steps - player_min_steps
 
         return my_score
 
