@@ -55,6 +55,13 @@ class MyAgent(Agent):
 
         player_min_steps = board.min_steps_before_victory(player)
         opponent_min_steps = board.min_steps_before_victory(not player)
+        if (step < 12 and board.nb_walls[0] + board.nb_walls[1] == 20) or step < 5:
+            try:
+                (x, y) = board.get_shortest_path(player)[0]
+            except NoPath:
+                print("NO PATH 1 play()")
+                return board.get_legal_pawn_moves(player)[0]
+            return ("P", x, y)
         if (
             time_left >= 45 or player_min_steps > opponent_min_steps
         ) and board.nb_walls[player] > 0:
@@ -63,7 +70,7 @@ class MyAgent(Agent):
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
-                return None
+                return board.get_legal_pawn_moves(player)[0]
 
             action = ("P", x, y)
 
@@ -181,7 +188,7 @@ class MyAgent(Agent):
             player_min_steps = state.min_steps_before_victory(player)
             opponent_min_steps = state.min_steps_before_victory(opponent)
             my_score = 100 / max(player_min_steps, 0.001)
-            my_score -= 150 / (max(opponent_min_steps, 0.01) ** 2)
+            my_score -= 100 / (max(opponent_min_steps, 0.01) ** 2)
         except NoPath:
             print("NO PATH estimate_score")
             return -float("inf")
@@ -193,7 +200,7 @@ class MyAgent(Agent):
 
         my_score += state.nb_walls[player] - state.nb_walls[opponent]
 
-        # my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+        my_score += 2 * (state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1])
         my_score += opponent_min_steps - player_min_steps
 
         return my_score
