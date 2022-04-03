@@ -58,7 +58,7 @@ class MyAgent(Agent):
         if (
             time_left >= 45 or player_min_steps > opponent_min_steps
         ) and board.nb_walls[player] > 0:
-            action = self.minimax(board, player, step, time_left)
+            _, action = self.minimax(board, player, step, time_left)
         else:
             try:
                 (x, y) = board.get_shortest_path(player)[0]
