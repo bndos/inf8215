@@ -52,30 +52,32 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
 
         # TODO: implement your agent and return an action for the current step.
-        if time_left >= 45 and board.nb_walls[player] > 0:
-            print(time_left)
-            value, action = self.minimax(board, player, step, time_left)
-            print(value, action)
-        # No more walls or time is running out
+
+        player_min_steps = board.min_steps_before_victory(player)
+        opponent_min_steps = board.min_steps_before_victory(not player)
+        if (
+            time_left >= 45 or player_min_steps > opponent_min_steps
+        ) and board.nb_walls[player] > 0:
+            _, action = self.minimax(board, player, step, time_left)
         else:
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
-                print("NO PATH")
                 return None
 
             action = ("P", x, y)
 
         return action
 
-    def cutoff(self, step, depth, start_time, time_left):
+    def treshold(self, step, depth, start_time):
         current_time = time.time()
-        # 5 seconds to search
+
         if current_time - start_time >= 5:
             return True
-        # Reduce depth at the start or end of the game
-        if step < 7 or time_left < 100:
+
+        if step <= 7:
             return depth >= 2
+
         return depth > 25
 
     def minimax(self, state: Board, player, step, time_left):
@@ -87,7 +89,7 @@ class MyAgent(Agent):
     def max_value(
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
-        if self.cutoff(step, depth, start_time, time_left):
+        if self.treshold(step, depth, start_time):
             return self.evaluate(state, player), None
 
         if state.is_finished():
@@ -113,7 +115,7 @@ class MyAgent(Agent):
     def min_value(
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
-        if self.cutoff(step, depth, start_time, time_left):
+        if self.treshold(step, depth, start_time):
             return self.evaluate(state, player), None
 
         if state.is_finished():
@@ -149,7 +151,6 @@ class MyAgent(Agent):
 
         for wall_move in all_wall_moves:
             (_, x, y) = wall_move
-            # Walls close to opponent
             distance_from_opponent = self.manhattan([x, y], position_opponent)
             distance_from_player = self.manhattan([x, y], position_player)
 
@@ -162,7 +163,6 @@ class MyAgent(Agent):
         return best_wall_moves, opponent_wall_moves
 
     def get_actions(self, state: Board, player):
-        # all_actions = state.get_actions(player)
         actions_to_explore = []
         all_pawn_moves = state.get_legal_pawn_moves(player)
 
@@ -176,26 +176,24 @@ class MyAgent(Agent):
 
     def evaluate(self, state: Board, player):
         opponent = not player
+
         try:
-            my_score = 100 / max(state.min_steps_before_victory(player), 0.001)
-            my_score -= 100 / (max(state.min_steps_before_victory(opponent), 0.01) ** 2)
+            player_min_steps = state.min_steps_before_victory(player)
+            opponent_min_steps = state.min_steps_before_victory(opponent)
+            my_score = 100 / max(player_min_steps, 0.001)
+            my_score -= 100 / (max(opponent_min_steps, 0.01) ** 2)
         except NoPath:
             print("NO PATH estimate_score")
-            my_score = float("inf")
+            return -float("inf")
 
         my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
 
         my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
-        # my_score -= state.pawns[player][1] - state.get_shortest_path(player)[-1][1]
 
         if state.pawns[player][0] == state.goals[player]:
-            my_score += 100000000
-        elif (
-            abs(state.pawns[opponent][0] - state.goals[opponent]) <= 1
-            and state.nb_walls[player]
-        ):
-            my_score -= 100000000
-        # print(my_score)
+            return float("inf")
+        elif state.pawns[opponent][0] == state.goals[opponent]:
+            return -float("inf")
 
         return my_score
 

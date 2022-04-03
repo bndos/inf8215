@@ -181,19 +181,19 @@ class MyAgent(Agent):
             player_min_steps = state.min_steps_before_victory(player)
             opponent_min_steps = state.min_steps_before_victory(opponent)
             my_score = 100 / max(player_min_steps, 0.001)
-            my_score -= 100 / (max(opponent_min_steps, 0.01) ** 2)
+            my_score -= 150 / (max(opponent_min_steps, 0.01) ** 2)
         except NoPath:
             print("NO PATH estimate_score")
             return -float("inf")
-
-        my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
-
-        my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
 
         if state.pawns[player][0] == state.goals[player]:
             return float("inf")
         elif state.pawns[opponent][0] == state.goals[opponent]:
             return -float("inf")
+
+        my_score += (state.nb_walls[player]) - state.nb_walls[opponent]
+        my_score += state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+        my_score -= state.pawns[player][1] - state.get_shortest_path(player)[-1][1]
 
         return my_score
 
