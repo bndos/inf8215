@@ -52,7 +52,12 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
 
         # TODO: implement your agent and return an action for the current step.
-        if time_left >= 45 and board.nb_walls[player] > 0:
+
+        player_min_steps = board.min_steps_before_victory(player)
+        opponent_min_steps = board.min_steps_before_victory(not player)
+        if (
+            time_left >= 45 or player_min_steps > opponent_min_steps
+        ) and board.nb_walls[player] > 0:
             print(time_left)
             value, action = self.minimax(board, player, step, time_left)
             print(value, action)
@@ -68,14 +73,15 @@ class MyAgent(Agent):
 
         return action
 
-    def cutoff(self, step, depth, start_time, time_left):
+    def treshold(self, step, depth, start_time):
         current_time = time.time()
-        # 5 seconds to search
+
         if current_time - start_time >= 5:
             return True
-        # Reduce depth at the start or end of the game
-        if step < 7 or time_left < 100:
+
+        if step <= 7:
             return depth >= 2
+
         return depth > 25
 
     def minimax(self, state: Board, player, step, time_left):
@@ -87,7 +93,7 @@ class MyAgent(Agent):
     def max_value(
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
-        if self.cutoff(step, depth, start_time, time_left):
+        if self.treshold(step, depth, start_time):
             return self.evaluate(state, player), None
 
         if state.is_finished():
@@ -113,7 +119,7 @@ class MyAgent(Agent):
     def min_value(
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
-        if self.cutoff(step, depth, start_time, time_left):
+        if self.treshold(step, depth, start_time):
             return self.evaluate(state, player), None
 
         if state.is_finished():
