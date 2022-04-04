@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Quoridor agent.
-Copyright (C) 2013, <<<<<<<<<<< YOUR NAMES HERE >>>>>>>>>>>
+Copyright (C) 2013, <<<<<<<<<<< Brando Tovar 1932052, Estefan Vega Calcada 1934346 >>>>>>>>>>>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -76,17 +76,11 @@ class MyAgent(Agent):
 
             action = ("P", x, y)
 
-        print("action", action)
-
         if not board.is_action_valid(action, player):
             print("illegal: ", action)
             actions = list(board.get_actions(player))
             return random.choice(actions)
 
-        clone = board.clone()
-        print("playing")
-        clone.play_action(action, player)
-        self.evaluate(clone, player)
         return action
 
     # Controls the duration of minimax algorithm
@@ -167,7 +161,7 @@ class MyAgent(Agent):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
     # Verifies if wall is in the path
-    def coord_in_path(self, x, y, shortest_path):
+    def wall_in_path(self, x, y, shortest_path):
         if not len(shortest_path):
             return False
         return (
@@ -209,9 +203,9 @@ class MyAgent(Agent):
 
             if (
                 distance_from_opponent <= 3
-                or self.coord_in_path(x, y, opponent_path)
+                or self.wall_in_path(x, y, opponent_path)
                 or distance_from_player <= 3
-                or self.coord_in_path(x, y, player_path)
+                or self.wall_in_path(x, y, player_path)
             ):
                 best_wall_moves.append(wall_move)
 
@@ -233,7 +227,7 @@ class MyAgent(Agent):
     def evaluate(self, state: Board, player):
         opponent = not player
 
-        my_score = 10 * pow(state.get_score(player) - 1, 3)
+        my_score = 50 * pow(state.get_score(player) - 1, 3)
 
         if state.pawns[player][0] == state.goals[player]:
             return float("inf")
@@ -254,7 +248,7 @@ class MyAgent(Agent):
         except NoPath:
             pass
 
-        my_score += state.nb_walls[player] ** 2 - state.nb_walls[opponent] ** 2
+        my_score += 50 * (state.nb_walls[player] ** 2 - state.nb_walls[opponent] ** 2)
 
         return my_score
 
