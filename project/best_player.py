@@ -82,6 +82,11 @@ class MyAgent(Agent):
             print("illegal: ", action)
             actions = list(board.get_actions(player))
             return random.choice(actions)
+
+        clone = board.clone()
+        print("playing")
+        clone.play_action(action, player)
+        self.evaluate(clone, player)
         return action
 
     def treshold(self, step, depth, start_time):
@@ -221,7 +226,7 @@ class MyAgent(Agent):
     def evaluate(self, state: Board, player):
         opponent = not player
 
-        my_score = 10 * pow(state.get_score(player), 3)
+        my_score = 10 * pow(state.get_score(player) - 1, 3)
 
         if state.pawns[player][0] == state.goals[player]:
             return float("inf")
@@ -232,11 +237,11 @@ class MyAgent(Agent):
         if state.nb_walls[player] == 0 and my_score < 0:
             return -float("inf")
 
-
         try:
-            my_score += 16 * (
-                state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
-            ) ** 2
+            opponent_path = state.get_shortest_path(opponent)
+            if len(opponent_path) == 1:
+                my_score -= 1000
+            my_score += 16 * (state.pawns[opponent][1] - opponent_path[-1][1]) ** 2
             if not (state.pawns[player][1] - state.get_shortest_path(player)[-1][1]):
                 my_score += 40
         except NoPath:
