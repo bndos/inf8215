@@ -89,6 +89,7 @@ class MyAgent(Agent):
         self.evaluate(clone, player)
         return action
 
+    # Controls the duration of minimax algorithm
     def treshold(self, step, depth, start_time):
         current_time = time.time()
 
@@ -100,12 +101,14 @@ class MyAgent(Agent):
 
         return depth > 25
 
+    # Minimax algorithm
     def minimax(self, state: Board, player, step, time_left):
         start = time.time()
         return self.max_value(
             state, player, step, start, time_left, -float("inf"), float("inf"), 0
         )
 
+    # Part 1 of Minimax
     def max_value(
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
@@ -132,6 +135,7 @@ class MyAgent(Agent):
                 return v_star, m_star
         return v_star, m_star
 
+    # Part 2 of Minimax
     def min_value(
         self, state: Board, player, step, start_time, time_left, alpha, beta, depth: int
     ):
@@ -158,9 +162,11 @@ class MyAgent(Agent):
                 return v_star, m_star
         return v_star, m_star
 
+    # Manhattan Distance
     def manhattan(self, pos1, pos2):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
+    # Verifies if wall is in the path
     def coord_in_path(self, x, y, shortest_path):
         if not len(shortest_path):
             return False
@@ -223,6 +229,7 @@ class MyAgent(Agent):
 
         return actions_to_explore
 
+    # Evaluates the next move to play by the agent
     def evaluate(self, state: Board, player):
         opponent = not player
 
