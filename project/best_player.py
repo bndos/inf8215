@@ -221,23 +221,28 @@ class MyAgent(Agent):
     def evaluate(self, state: Board, player):
         opponent = not player
 
-        try:
-            player_min_steps = state.min_steps_before_victory(player)
-            opponent_min_steps = state.min_steps_before_victory(opponent)
-            my_score = 50 * state.get_score(player)
-            my_score += (
-                state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
-            ) ** 2
-        except NoPath:
-            print("NO PATH estimate_score")
-            return -float("inf")
+        my_score = 10 * pow(state.get_score(player), 3)
 
         if state.pawns[player][0] == state.goals[player]:
             return float("inf")
         elif state.pawns[opponent][0] == state.goals[opponent]:
             return -float("inf")
+        if state.nb_walls[opponent] == 0 and my_score > 0:
+            return float("inf")
+        if state.nb_walls[player] == 0 and my_score < 0:
+            return -float("inf")
 
-        my_score += state.nb_walls[player] - state.nb_walls[opponent]
+
+        try:
+            my_score += 16 * (
+                state.pawns[opponent][1] - state.get_shortest_path(opponent)[-1][1]
+            ) ** 2
+            if not (state.pawns[player][1] - state.get_shortest_path(player)[-1][1]):
+                my_score += 40
+        except NoPath:
+            pass
+
+        my_score += state.nb_walls[player] ** 2 - state.nb_walls[opponent] ** 2
 
         return my_score
 
