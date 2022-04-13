@@ -9,27 +9,17 @@ Authors:
 BEANS = ["SIRA", "HOROZ", "DERMASON", "BARBUNYA", "CALI", "BOMBAY", "SEKER"]
 BEANS_INDEXES = {BEANS[i]: i for i in range(len(BEANS))}
 
-from sklearn import preprocessing
 from bean_testers import BeanTester
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 from sklearn.multiclass import OneVsOneClassifier
-
-
-from sklearn.model_selection import cross_val_score
-from sklearn.multiclass import OneVsRestClassifier
-
-np.random.seed(42)
 
 
 class MyBeanTester(BeanTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.1, C=2.5))
+        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.19, C=2.8))
 
     def min_max_scaler(self, features):
         """
