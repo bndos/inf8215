@@ -29,7 +29,7 @@ np.random.seed(42)
 class MyBeanTester(BeanTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.clf = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.1, C=2.5))
+        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.1, C=2.5))
 
     def min_max_scaler(self, features):
         """
@@ -69,7 +69,7 @@ class MyBeanTester(BeanTester):
         x_train = self.preprocess_data(X_train)
         y_train = np.array(y_train)[:, -1]
 
-        self.clf.fit(x_train, y_train)
+        self.model.fit(x_train, y_train)
         # y_train_score = cross_val_score(
         #     self.clf, x_train, y_train, cv=3, scoring="f1_micro"
         # )
@@ -92,6 +92,6 @@ class MyBeanTester(BeanTester):
         """
         # TODO: make predictions on X_data and return them
         x_data = self.preprocess_data(X_data)
-        y_pred = self.clf.predict(x_data)
+        y_pred = self.model.predict(x_data)
         y_pred = [[i + 1, pred] for i, pred in enumerate(y_pred)]
         return y_pred
