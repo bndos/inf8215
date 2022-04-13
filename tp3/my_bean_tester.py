@@ -9,26 +9,27 @@ Authors:
 BEANS = ["SIRA", "HOROZ", "DERMASON", "BARBUNYA", "CALI", "BOMBAY", "SEKER"]
 BEANS_INDEXES = {BEANS[i]: i for i in range(len(BEANS))}
 
+from sklearn import preprocessing
 from bean_testers import BeanTester
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+import matplotlib.pyplot as plt
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+from sklearn.svm import SVC
+from sklearn.multiclass import OneVsOneClassifier
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.multiclass import OneVsRestClassifier
+
+np.random.seed(42)
 
 
 class MyBeanTester(BeanTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.model = keras.models.Sequential()
-        self.model.add(keras.layers.Flatten())
-        self.model.add(keras.layers.Dense(12, activation=tf.nn.sigmoid))
-        self.model.add(keras.layers.Dense(3, activation=tf.nn.sigmoid))
-        self.model.add(keras.layers.Dense(len(BEANS), activation=tf.nn.sigmoid))
-
-        self.model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.3),
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
-        )
+        self.clf = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.1, C=2.5))
 
     def min_max_scaler(self, features):
         """
@@ -44,10 +45,13 @@ class MyBeanTester(BeanTester):
         return features_scaled.astype("float32")
 
     def preprocess_data(self, x_data):
-        x_train = [[float(feature) for feature in features[1:]] for features in x_data]
-        x_train = self.min_max_scaler(x_train)
-        return x_train
+        scaler = StandardScaler()
+        x_train = np.array(
+            [[float(feature) for feature in features[1:]] for features in x_data]
+        )
+        x_train = scaler.fit_transform(x_train.astype(np.float64))
 
+        return x_train
 
     def train(self, X_train, y_train):
         """
@@ -62,16 +66,13 @@ class MyBeanTester(BeanTester):
                 the second column is the example label.
         """
         # TODO: entrainer un modèle sur X_train & y_train
-
-        # mnist = keras.datasets.mnist
-        # ((x_train, y_train), (x_test, y_test)) = mnist.load_data()
-        # print(x_train)
-
         x_train = self.preprocess_data(X_train)
-        y_train = [BEANS_INDEXES[bean[1]] for bean in y_train]
+        y_train = np.array(y_train)[:, -1]
 
-        # print(y_train)
-        self.model.fit(x_train, np.array(y_train), epochs=3000)
+        self.clf.fit(x_train, y_train)
+        # y_train_score = cross_val_score(
+        #     self.clf, x_train, y_train, cv=3, scoring="f1_micro"
+        # )
 
     def predict(self, X_data):
         """
@@ -91,7 +92,6 @@ class MyBeanTester(BeanTester):
         """
         # TODO: make predictions on X_data and return them
         x_data = self.preprocess_data(X_data)
-        predictions = self.model.predict(x_data)
-        predictions = [[i + 1, BEANS[np.argmax(prediction)]] for i, prediction in enumerate(predictions)]
-
-        return predictions
+        y_pred = self.clf.predict(x_data)
+        y_pred = [[i + 1, pred] for i, pred in enumerate(y_pred)]
+        return y_pred

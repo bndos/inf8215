@@ -90,10 +90,10 @@ class MyAgent(Agent):
         if current_time - start_time >= 5:
             return True
 
-        if step <= 7:
+        if step <= 8:
             return depth >= 2
 
-        return depth > 25
+        return depth > 30
 
     # Minimax algorithm
     def minimax(self, state: Board, player, step, time_left):
@@ -240,15 +240,20 @@ class MyAgent(Agent):
 
         try:
             opponent_path = state.get_shortest_path(opponent)
+            player_path = state.get_shortest_path(player)
             if len(opponent_path) == 1:
                 my_score -= 1000
-            my_score += 16 * (state.pawns[opponent][1] - opponent_path[-1][1]) ** 2
-            if not (state.pawns[player][1] - state.get_shortest_path(player)[-1][1]):
-                my_score += 40
+            my_score += 10 * (state.pawns[opponent][1] - opponent_path[-1][1]) ** 2
+
+            distance_to_row = abs(state.pawns[player][0] - player_path[-1][0])
+            distance_to_column = abs(state.pawns[player][1] - player_path[-1][1])
+
+            my_score -= abs(distance_to_column - distance_to_row) / len(player_path)
+
         except NoPath:
             pass
 
-        my_score += 50 * (state.nb_walls[player] ** 2 - state.nb_walls[opponent] ** 2)
+        my_score += state.nb_walls[player] ** 2 - state.nb_walls[opponent] ** 2
 
         return my_score
 

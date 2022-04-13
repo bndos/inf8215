@@ -29,7 +29,7 @@ class MyAgent(Agent):
     """My Quoridor agent."""
 
     def __init__(self):
-        self.mcts = MCTS({"num_simulations": 100})
+        self.mcts = MCTS({"num_simulations": 300})
 
     def play(self, percepts, player, step, time_left):
         """
@@ -55,18 +55,35 @@ class MyAgent(Agent):
 
         board = dict_to_board(percepts)
 
+        player_min_steps = board.min_steps_before_victory(player)
+        opponent_min_steps = board.min_steps_before_victory(not player)
         # TODO: implement your agent and return an action for the current step.
-        if time_left >= 45 and board.nb_walls[player] > 0:
+        if (step < 12 and board.nb_walls[0] + board.nb_walls[1] == 20) or step < 5:
+            try:
+                (x, y) = board.get_shortest_path(player)[0]
+            except NoPath:
+                actions = list(board.get_actions(player))
+                return random.choice(actions)
+            return ("P", x, y)
+        if (
+            time_left >= 45 or player_min_steps > opponent_min_steps
+        ) and board.nb_walls[player] > 0:
             action = self.mcts.run(board, player)
         # No more walls or time is running out
         else:
             try:
                 (x, y) = board.get_shortest_path(player)[0]
             except NoPath:
-                print("NO PATH")
-                return None
+                actions = list(board.get_actions(player))
+                return random.choice(actions)
 
             action = ("P", x, y)
+
+        if not board.is_action_valid(action, player):
+            print("illegal: ", action)
+            actions = list(board.get_actions(player))
+            return random.choice(actions)
+
 
         return action
 
@@ -121,29 +138,48 @@ class MCTS:
         return actions_to_explore
 
     def get_random_action(self, state: Board, player):
-        # actions = self.get_valid_actions(state, player)
-        opponent = (player + 1) % 2
+        actions = self.get_valid_actions(state, player)
+        return random.choice(actions)
 
-        if (
-            abs(state.pawns[opponent][0] - state.goals[opponent]) == 1
-            and state.nb_walls[player]
-        ):
-            actions = self.get_valid_wall_moves(state, opponent)
-            if len(actions):
-                return random.choice(actions)
+    # Evaluates the next move to play by the agent
+    def evaluate(self, state: Board, player):
+        opponent = not player
 
-        (x, y) = state.get_shortest_path(player)[0]
-        return ("P", x, y)
-        # return random.choice(actions)
+        my_score = 50 * pow(state.get_score(player) - 1, 3)
 
-    def get_reward(self, state: Board, player):
-        opponent = (player + 1) % 2
+        if state.pawns[player][0] == state.goals[player]:
+            return float("inf")
+        elif state.pawns[opponent][0] == state.goals[opponent]:
+            return -float("inf")
+        if state.nb_walls[opponent] == 0 and my_score > 0:
+            return float("inf")
+        if state.nb_walls[player] == 0 and my_score < 0:
+            return -float("inf")
 
-        reward = int(state.pawns[player][0] == state.goals[player])
+        try:
+            opponent_path = state.get_shortest_path(opponent)
+            if len(opponent_path) == 1:
+                my_score -= 1000
+            my_score += 16 * (state.pawns[opponent][1] - opponent_path[-1][1]) ** 2
+            if not (state.pawns[player][1] - state.get_shortest_path(player)[-1][1]):
+                my_score += 40
+        except NoPath:
+            pass
 
-        reward += int(state.pawns[opponent][0] == state.goals[opponent]) * -1
+        my_score += 50 * (state.nb_walls[player] ** 2 - state.nb_walls[opponent] ** 2)
 
-        return reward
+        return my_score
+
+    def get_reward(self, state: Board, player, depth):
+        if state.pawns[player][0] == state.goals[player]:
+            return float("inf")
+        elif state.pawns[not player][0] == state.goals[not player]:
+            return -float("inf")
+
+        if depth > 7:
+            return self.evaluate(state, player)
+
+        return 0
 
     def run(self, state, to_play):
 
@@ -160,11 +196,15 @@ class MCTS:
             search_path = [next_node]
 
             # SELECT
+            depth = 0
             while next_node.expanded():
+                depth += 1
+                if next_node.select_child() is None:
+                    break
                 _, next_node = next_node.select_child()
                 search_path.append(next_node)
 
-            reward = self.get_reward(next_node.state, player=root.to_play)
+            reward = self.get_reward(state=next_node.state, player=root.to_play, depth=depth)
             if not reward:
                 # If the game has not ended:
                 # EXPAND
@@ -179,11 +219,12 @@ class MCTS:
                 simulation_state = next_node.state.clone()
                 simulation_player = next_node.to_play
                 while not reward:
+                    depth += 1
                     simulation_state = simulation_state.play_action(
                         self.get_random_action(simulation_state, simulation_player),
                         simulation_player,
                     )
-                    reward = self.get_reward(simulation_state, player=root.to_play)
+                    reward = self.get_reward(simulation_state, player=root.to_play, depth=depth)
                     simulation_player = (simulation_player + 1) % 2
 
                 self.backpropagate(search_path, reward, next_node.to_play)
