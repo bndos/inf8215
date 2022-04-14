@@ -11,9 +11,23 @@ BEANS_INDEXES = {BEANS[i]: i for i in range(len(BEANS))}
 
 from bean_testers import BeanTester
 import numpy as np
+
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import minmax_scale
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import PowerTransformer
+
+
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.multiclass import OneVsOneClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import NearestCentroid
+from sklearn.model_selection import cross_val_score
 
 
 class MyBeanTester(BeanTester):
@@ -60,9 +74,11 @@ class MyBeanTester(BeanTester):
         y_train = np.array(y_train)[:, -1]
 
         self.model.fit(x_train, y_train)
-        # y_train_score = cross_val_score(
-        #     self.clf, x_train, y_train, cv=3, scoring="f1_micro"
-        # )
+        y_train_score = cross_val_score(
+            self.model, x_train, y_train, cv=10, scoring="f1_micro"
+        )
+        print(y_train_score)
+        print(sum(y_train_score)/ len(y_train_score))
 
     def predict(self, X_data):
         """

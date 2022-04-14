@@ -14,7 +14,7 @@
 #+latex_header: \let\cite\parencite
 
 #+LATEX_CLASS: extarticle
-#+LATEX_CLASS_OPTIONS: [14pt]
+#+LATEX_CLASS_OPTIONS: [12pt]
 
 
 #+begin_export latex
@@ -48,8 +48,79 @@ Le \today
 
 
 * Contexte
-Dans ce travail pratique, il nous était demander de classifier des légumes secs dans leur catégories respectives. Il y en avait 7 en tout:
+Dans ce travail pratique, il nous était demander de classifier des légumes secs dans leur catégorie respectives. Il y en avait 7 en tout; Sira, Horoz, Dermason, Barbunya, Cali, Bombay, Seker et nous devions déterminer la catégorie à l'aide de 16 /features/. Nous avions donc à résoudre un problème de classification multiclasses. Nous avons décider d'utiliser la librairie /scikit-learn/ et le modèle que nous avons utilisé se base sur les machines à vecteurs de support (/SVC OneVsOneClassifier/). Nous avons aussi exploré d'autres modèle telles que celui basée sur la descente de gradient stochastique (/SGDClassifier/) et celle basée sur les forêts aléatoires (/RandomForestClassifier/)
 
+* Prétraitement
+Avant de commencé à résoudre le problème, il est utile de se familiariser avec les données. Nos données étaient constitué de 16 /features/. Il y avait 6000 données de test. Nous avons commencé par voir s'il manquait des valeurs dans certaines de no données test ce qui n'était pas le cas. Nous avons ensuite regardé si nos donées étaient balancées.
+\vspace{5mm}
+
+#+attr_latex: :options {.45\textwidth}
+#+LABEL: fig:figure1
+#+begin_minipage
+#+ATTR_LaTeX: :width \linewidth
+[[file:./.ob-jupyter/0e36c24725fa023c6e39f07bc9df640645c86811.png]]
+\vspace*{-5mm}
+\captionof{figure}{Diagramme à bandes des catégories}
+#+end_minipage
+#+attr_latex: :options {.55\textwidth}
+#+LABEL: fig:figure2
+#+begin_minipage
+#+ATTR_LaTeX: :width \linewidth
+[[file:./.ob-jupyter/da88383af5d1618a3cb0bf8008eb6ce0c4c86bce.png]]
+\vspace*{-5mm}
+\captionof{figure}{Matrice de corrélation}
+#+end_minipage
+
+\vspace{5mm}
+
+Il a été intéressant de voir qu'il y a présence de débalancement et que certains attributs étaient très corrélés entre eux soit > 0.9 ou < -0.9. Nous avons essayer de retirer les attributs corrélées, mais il n'y a pas vraiment eu de gain et nous avons donc décider de garder tous les attributs.
+
+Une fois les analyse de données terminées, nous avons dû faire quelques changement dans les données afin de pouvoir utiliser notre modèle. Nous avons en premier lieu, dû transformer les valeurs de X\under{}train (attributs) en float. Nous avons ensuite retirer les valeurs de /ID/ dans X\under{}train et y\under{}train. Nous pouvions ainsi entrainer notre modèle. Étant données les mauvais résultats initiaux, nous avons dû faire appel à la normalisation. Nous sommes donc passées d'une précision de 0.268 à une de 0.933 sur le classificateur SVM.
+
+
+#+begin_src jupyter-python :session py :results output :exports results :eval never-export
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+data = pd.read_csv('../data/beans_train.csv')
+#+end_src
+
+#+RESULTS:
+
+#+begin_src jupyter-python :session py :results output :exports none :eval never-export
+data['class'].value_counts()
+data['class'].value_counts().plot(kind='bar')
+#+end_src
+
+#+RESULTS:
+[[file:./.ob-jupyter/0e36c24725fa023c6e39f07bc9df640645c86811.png]]
+
+#+begin_src jupyter-python :session py :results output :exports none :eval never-export
+# how features are correlated with each other
+X = data.copy()
+X.drop("ID",axis=1,inplace=True)
+correlation_matrix = X.corr()
+#Visulaize heatmap for correlation matrix
+plt.figure(figsize=(15,8))
+sns.heatmap(correlation_matrix,annot=True)
+plt.show()
+
+#+end_src
+
+#+RESULTS:
+[[file:./.ob-jupyter/da88383af5d1618a3cb0bf8008eb6ce0c4c86bce.png]]
+
+
+* Méthodologie
+Le classificateur que nous avons choisis (/SVC/) est un classificateur binaire. Il était donc nécessaire de combiner ce classificateur avec une autre méthode. Nous avons donc choisi la méthode OneVsOne (/OneVsOneClassifier). En combinant ces deux algorithmes, nous obtenons un classificateur multiclasses qui est en fait composées de plusieurs classificateurs binaire. Dans notre cas nous avons 7 * 6 / 2 = 21 classificateurs binaires aux total.
+En ce qui concerne la répartition des données, nous avons utilisé l'intégralité des données pour tester notre modèle. Nous avons pris cette décision, car nous avons utilisé en parallèle la méthode de vérification /k-fold cross-validation/ avec k = 10. Ainsi, les données sont diviser en 10 parties dont 9 sont utilisées pour l'entraînement et la dernière comme partie de validation.
+
+* Résultats
+* Discussion
+
+* stuff
 # need the first column to use <>
 # <> is used to merge columns together
 #+attr_latex: :options {.5\textwidth}
@@ -109,33 +180,12 @@ ls -l
 | -rw-rw-r-- |   1 | bndo | bndo | 122403 | Nov | 18 | 00:21 | template.pdf     |
 | -rw-rw-r-- |   1 | bndo | bndo |   3174 | Nov | 18 | 00:21 | template.tex     |
 
+
 * Section 2
-#+attr_latex: :options {.5\textwidth}
-#+LABEL: fig:figure1
-#+begin_minipage
-#+ATTR_LaTeX: :width .8\linewidth
-[[./img/bear.jpg]]
-\vspace*{-5mm}
-\captionof{figure}{A figure}
-#+end_minipage
-#+attr_latex: :options {.5\textwidth}
-#+LABEL: fig:figure2
-#+begin_minipage
-#+ATTR_LaTeX: :width .8\linewidth
-[[./img/bear.jpg]]
-\vspace*{-5mm}
-\captionof{figure}{Another figure}
-#+end_minipage
-
-#+CAPTION: Regular image
-#+LABEL: fig:figure3
-#+ATTR_LaTeX: :width .4\linewidth
-[[./img/bear.jpg]]
-# needs org-ref
 \newpage
-voir figure [[fig:figure3]]
+# voir figure [[fig:figure3]]
 
-voir tableau [[tbl:table2]]
+# voir tableau [[tbl:table2]]
 
 
 selon une etude [[cite:&2021]]

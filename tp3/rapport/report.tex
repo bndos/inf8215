@@ -1,6 +1,6 @@
-% Created 2022-04-13 Wed 21:55
+% Created 2022-04-14 Thu 01:44
 % Intended LaTeX compiler: pdflatex
-\documentclass[14pt]{extarticle}
+\documentclass[12pt]{extarticle}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -52,7 +52,46 @@ Le \today
 
 
 \section{Contexte}
-\label{sec:org8ff3d3d}
+\label{sec:org812d05c}
+Dans ce travail pratique, il nous était demander de classifier des légumes secs dans leur catégorie respectives. Il y en avait 7 en tout; Sira, Horoz, Dermason, Barbunya, Cali, Bombay, Seker et nous devions déterminer la catégorie à l'aide de 16 \emph{features}. Nous avions donc à résoudre un problème de classification multiclasses. Nous avons décider d'utiliser la librairie \emph{scikit-learn} et le modèle que nous avons utilisé se base sur les machines à vecteurs de support (\emph{SVC OneVsOneClassifier}). Nous avons aussi exploré d'autres modèle telles que celui basée sur la descente de gradient stochastique (\emph{SGDClassifier}) et celle basée sur les forêts aléatoires (\emph{RandomForestClassifier})
+
+\section{Prétraitement}
+\label{sec:org60e422f}
+Avant de commencé à résoudre le problème, il est utile de se familiariser avec les données. Nos données étaient constitué de 16 \emph{features}. Il y avait 6000 données de test. Nous avons commencé par voir s'il manquait des valeurs dans certaines de no données test ce qui n'était pas le cas. Nous avons ensuite regardé si nos donées étaient balancées.
+\vspace{5mm}
+
+\begin{minipage}{.45\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{./.ob-jupyter/0e36c24725fa023c6e39f07bc9df640645c86811.png}
+\end{center}
+\vspace*{-5mm}
+\captionof{figure}{Diagramme à bandes des catégories}
+\label{fig:figure1}
+\end{minipage}
+\begin{minipage}{.55\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{./.ob-jupyter/da88383af5d1618a3cb0bf8008eb6ce0c4c86bce.png}
+\end{center}
+\vspace*{-5mm}
+\captionof{figure}{Matrice de corrélation}
+\label{fig:figure2}
+\end{minipage}
+
+\vspace{5mm}
+
+Il a été intéressant de voir qu'il y a présence de débalancement et que certains attributs étaient très corrélés entre eux soit > 0.9 ou < -0.9. Nous avons essayer de retirer les attributs corrélées, mais il n'y a pas vraiment eu de gain et nous avons donc décider de garder tous les attributs.
+
+Une fois les analyse de données terminées, nous avons dû faire quelques changement dans les données afin de pouvoir utiliser notre modèle. Nous avons en premier lieu, dû transformer les valeurs de X\_train (attributs) en float. Nous avons ensuite retirer les valeurs de \emph{ID} dans X\_train et y\_train. Nous pouvions ainsi entrainer notre modèle. Étant données les mauvais résultats initiaux, nous avons dû faire appel à la normalisation. Nous sommes donc passées d'une précision de 0.268 à une de 0.933 sur le classificateur SVM.
+
+\section{Méthodologie}
+\label{sec:org94ef7a2}
+\section{Résultats}
+\label{sec:org6d04546}
+\section{Discussion}
+\label{sec:org93a931b}
+
+\section{stuff}
+\label{sec:orgbd765b7}
 \begin{minipage}{.5\textwidth}
 \begin{center}
 \begin{tabular}{|r|rrr|rr|}
@@ -109,50 +148,24 @@ ls -l
 
 \begin{center}
 \begin{tabular}{lrllrlrrl}
-total & 280 &  &  &  &  &  &  & \\
+total & 256 &  &  &  &  &  &  & \\
 -rw-rw-r-- & 1 & bndo & bndo & 1406 & Apr & 13 & 21:12 & config.tex\\
-drwxrwxr-x & 2 & bndo & bndo & 4096 & Apr & 13 & 21:12 & img\\
-drwxrwxr-x & 2 & bndo & bndo & 4096 & Apr & 13 & 21:12 & \_minted-report\\
+drwxrwxr-x & 2 & bndo & bndo & 4096 & Apr & 13 & 23:18 & img\\
+drwxrwxr-x & 2 & bndo & bndo & 4096 & Apr & 13 & 23:34 & \_minted-report\\
 -rw-rw-r-- & 1 & bndo & bndo & 459 & Apr & 13 & 21:12 & packages.tex\\
 -rw-rw-r-- & 1 & bndo & bndo & 1378 & Apr & 13 & 21:12 & README.org\\
--rw-rw-r-- & 1 & bndo & bndo & 2978 & Apr & 13 & 21:52 & report.bbl\\
--rw-rw-r-- & 1 & bndo & bndo & 4159 & Apr & 13 & 21:55 & report.org\\
--rw-rw-r-- & 1 & bndo & bndo & 121003 & Apr & 13 & 21:52 & report.pdf\\
--rw-rw-r-- & 1 & bndo & bndo & 3909 & Apr & 13 & 21:55 & report.tex\\
--rw-rw-r-- & 1 & bndo & bndo & 120157 & Apr & 13 & 21:12 & result.pdf\\
+-rw-rw-r-- & 1 & bndo & bndo & 2978 & Apr & 14 & 01:24 & report.bbl\\
+-rw-rw-r-- & 1 & bndo & bndo & 7162 & Apr & 14 & 01:44 & report.org\\
+-rw-rw-r-- & 1 & bndo & bndo & 214812 & Apr & 14 & 01:24 & report.pdf\\
+-rw-rw-r-- & 1 & bndo & bndo & 5780 & Apr & 14 & 01:24 & report.tex\\
 -rw-rw-r-- & 1 & bndo & bndo & 738 & Apr & 13 & 21:12 & template.bib\\
 \end{tabular}
 \end{center}
 
+
 \section{Section 2}
-\label{sec:orge159329}
-\begin{minipage}{.5\textwidth}
-\begin{center}
-\includegraphics[width=.8\linewidth]{./img/bear.jpg}
-\end{center}
-\vspace*{-5mm}
-\captionof{figure}{A figure}
-\label{fig:figure1}
-\end{minipage}
-\begin{minipage}{.5\textwidth}
-\begin{center}
-\includegraphics[width=.8\linewidth]{./img/bear.jpg}
-\end{center}
-\vspace*{-5mm}
-\captionof{figure}{Another figure}
-\label{fig:figure2}
-\end{minipage}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=.4\linewidth]{./img/bear.jpg}
-\caption{\label{fig:figure3}Regular image}
-\end{figure}
-
+\label{sec:org2a13753}
 \newpage
-voir figure \ref{fig:figure3}
-
-voir tableau \ref{tbl:table2}
 
 
 selon une etude \cite{2021}
