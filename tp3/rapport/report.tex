@@ -1,0 +1,166 @@
+% Created 2022-04-13 Wed 21:55
+% Intended LaTeX compiler: pdflatex
+\documentclass[14pt]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\usepackage[french]{babel}
+\input{packages}
+\input{config}
+\onehalfspacing
+\addbibresource{template.bib}
+\let\cite\parencite
+\date{}
+\title{Template}
+\begin{document}
+
+\begin{ctitlepage}
+
+\cours{INF8215}
+
+\groupe{Groupe 01}
+
+\titre{\textbf{TP3} \\
+Classifications multiclasses:\\
+légumes secs}
+
+\vspace{.1in}
+
+\textbf{Par} \\
+Brando, Tovar \textbf{1932052} \\
+Vega, Estefan \textbf{1934346} \\
+Équipe: \textbf{BrandiniStifini} \\
+
+\vspace{.5in}
+
+Le \today
+
+\end{ctitlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+
+\section{Contexte}
+\label{sec:org8ff3d3d}
+\begin{minipage}{.5\textwidth}
+\begin{center}
+\begin{tabular}{|r|rrr|rr|}
+\hline
+N & N\textsuperscript{2} & N\textsuperscript{3} & N\textsuperscript{4} & sqrt(n) & sqrt[4](N)\\
+\hline
+1 & 1 & 1 & 1 & 1 & 1\\
+2 & 4 & 8 & 16 & 1.4142 & 1.1892\\
+3 & 9 & 27 & 81 & 1.7321 & 1.3161\\
+\hline
+\end{tabular}
+\end{center}
+\vspace*{-5mm}
+\captionof{table}{A table}
+\label{tbl:table1}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\begin{center}
+\begin{tabular}{|r|rrr|rr|}
+\hline
+N & N\textsuperscript{2} & N\textsuperscript{3} & N\textsuperscript{4} & sqrt(n) & sqrt[4](N)\\
+\hline
+1 & 1 & 1 & 1 & 1 & 1\\
+2 & 4 & 8 & 16 & 1.4142 & 1.1892\\
+3 & 9 & 27 & 81 & 1.7321 & 1.3161\\
+\hline
+\end{tabular}
+\end{center}
+\vspace*{-5mm}
+\captionof{table}{Another table}
+\label{tbl:table2}
+\end{minipage}
+
+\begin{table}[htbp]
+\caption{\label{tbl:table3}Regular table}
+\centering
+\begin{tabular}{|r|rrr|rr|}
+\hline
+N & N\textsuperscript{2} & N\textsuperscript{3} & N\textsuperscript{4} & sqrt(n) & sqrt[4](N)\\
+\hline
+1 & 1 & 1 & 1 & 1 & 1\\
+2 & 4 & 8 & 16 & 1.4142 & 1.1892\\
+3 & 9 & 27 & 81 & 1.7321 & 1.3161\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{listing}[htbp]
+\begin{minted}[breaklines=true,breakanywhere=true,linenos=true,gobble=-8,xleftmargin=20pt,bgcolor=borlandbg]{shell}
+ls -l
+\end{minted}
+\caption{Source code}
+\end{listing}
+
+\begin{center}
+\begin{tabular}{lrllrlrrl}
+total & 280 &  &  &  &  &  &  & \\
+-rw-rw-r-- & 1 & bndo & bndo & 1406 & Apr & 13 & 21:12 & config.tex\\
+drwxrwxr-x & 2 & bndo & bndo & 4096 & Apr & 13 & 21:12 & img\\
+drwxrwxr-x & 2 & bndo & bndo & 4096 & Apr & 13 & 21:12 & \_minted-report\\
+-rw-rw-r-- & 1 & bndo & bndo & 459 & Apr & 13 & 21:12 & packages.tex\\
+-rw-rw-r-- & 1 & bndo & bndo & 1378 & Apr & 13 & 21:12 & README.org\\
+-rw-rw-r-- & 1 & bndo & bndo & 2978 & Apr & 13 & 21:52 & report.bbl\\
+-rw-rw-r-- & 1 & bndo & bndo & 4159 & Apr & 13 & 21:55 & report.org\\
+-rw-rw-r-- & 1 & bndo & bndo & 121003 & Apr & 13 & 21:52 & report.pdf\\
+-rw-rw-r-- & 1 & bndo & bndo & 3909 & Apr & 13 & 21:55 & report.tex\\
+-rw-rw-r-- & 1 & bndo & bndo & 120157 & Apr & 13 & 21:12 & result.pdf\\
+-rw-rw-r-- & 1 & bndo & bndo & 738 & Apr & 13 & 21:12 & template.bib\\
+\end{tabular}
+\end{center}
+
+\section{Section 2}
+\label{sec:orge159329}
+\begin{minipage}{.5\textwidth}
+\begin{center}
+\includegraphics[width=.8\linewidth]{./img/bear.jpg}
+\end{center}
+\vspace*{-5mm}
+\captionof{figure}{A figure}
+\label{fig:figure1}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\begin{center}
+\includegraphics[width=.8\linewidth]{./img/bear.jpg}
+\end{center}
+\vspace*{-5mm}
+\captionof{figure}{Another figure}
+\label{fig:figure2}
+\end{minipage}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.4\linewidth]{./img/bear.jpg}
+\caption{\label{fig:figure3}Regular image}
+\end{figure}
+
+\newpage
+voir figure \ref{fig:figure3}
+
+voir tableau \ref{tbl:table2}
+
+
+selon une etude \cite{2021}
+
+\newpage
+
+\phantomsection
+\addcontentsline{toc}{section}{Références}
+
+\printbibliography
+\end{document}

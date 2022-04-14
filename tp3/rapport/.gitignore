@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+.auctex-auto
+_minted-template
+_minted-report
+_minted*
+template.tex
+*.bbl
