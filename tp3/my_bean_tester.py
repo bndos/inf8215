@@ -33,7 +33,7 @@ from sklearn.model_selection import cross_val_score
 class MyBeanTester(BeanTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.19, C=2.8))
+        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.19, C=2.8, class_weight='balanced'))
 
     def min_max_scaler(self, features):
         """
