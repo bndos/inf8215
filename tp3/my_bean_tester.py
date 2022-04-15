@@ -33,7 +33,7 @@ from sklearn.model_selection import cross_val_score
 class MyBeanTester(BeanTester):
     def __init__(self):
         # TODO: initialiser votre modèle ici:
-        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.19, C=2.8, class_weight='balanced'))
+        self.model = OneVsOneClassifier(SVC(kernel="rbf", gamma=0.19, C=2.8))
 
     def min_max_scaler(self, features):
         """
@@ -77,8 +77,8 @@ class MyBeanTester(BeanTester):
         y_train_score = cross_val_score(
             self.model, x_train, y_train, cv=10, scoring="f1_micro"
         )
-        print(y_train_score)
-        print(sum(y_train_score)/ len(y_train_score))
+        print([ round(elem,3) for elem in y_train_score ])
+        print(round(sum(y_train_score)/ len(y_train_score), 3))
 
     def predict(self, X_data):
         """
