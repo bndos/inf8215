@@ -227,7 +227,7 @@ class MyAgent(Agent):
     def evaluate(self, state: Board, player):
         opponent = not player
 
-        my_score = 50 * pow(state.get_score(player) - 1, 3)
+        my_score = 50 * state.get_score(player)
 
         if state.pawns[player][0] == state.goals[player]:
             return float("inf")
@@ -245,10 +245,10 @@ class MyAgent(Agent):
                 my_score -= 1000
             my_score += 10 * (state.pawns[opponent][1] - opponent_path[-1][1]) ** 2
 
-            distance_to_row = abs(state.pawns[player][0] - player_path[-1][0])
-            distance_to_column = abs(state.pawns[player][1] - player_path[-1][1])
+            # distance_to_row = abs(state.pawns[player][0] - player_path[-1][0])
+            # distance_to_column = abs(state.pawns[player][1] - player_path[-1][1])
 
-            my_score -= abs(distance_to_column - distance_to_row) / len(player_path)
+            # my_score -= abs(distance_to_column - distance_to_row) / len(player_path)
 
         except NoPath:
             pass

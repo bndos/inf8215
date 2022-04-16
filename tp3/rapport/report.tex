@@ -1,4 +1,4 @@
-% Created 2022-04-15 Fri 03:09
+% Created 2022-04-15 Fri 03:11
 % Intended LaTeX compiler: pdflatex
 \documentclass[12pt]{extarticle}
 \usepackage[utf8]{inputenc}
@@ -53,11 +53,11 @@ Le \today
 
 
 \section{Contexte}
-\label{sec:orgd42d1f3}
+\label{sec:orgd586116}
 Dans ce travail pratique, il nous était demandé de classifier des légumes secs dans leurs catégorie respectives. Il y en avait 7 en tout ; Sira, Horoz, Dermason, Barbunya, Cali, Bombay, Seker et nous devions déterminer la catégorie à l'aide de 16 \emph{features}. Nous avions donc à résoudre un problème de classification multiclasses. Nous avons décidé d'utiliser la librairie \emph{scikit-learn} et le modèle que nous avons utilisé se base sur les machines à vecteurs de support (\emph{SVC OneVsOneClassifier}). Nous avons aussi exploré d'autres modèles telles que celui basée sur la descente de gradient stochastique (\emph{SGDClassifier}) et celle basée sur les forêts aléatoires (\emph{RandomForestClassifier})
 
 \section{Prétraitement}
-\label{sec:org8076266}
+\label{sec:orgee5e60a}
 Avant de commencer à résoudre le problème, il est utile de se familiariser avec les données. Nos données étaient constituées de 16 \emph{features}. Il y avait 6000 données de test. Nous avons commencé par voir s'il manquait des valeurs dans certaines de no données test ce qui n'était pas le cas. Nous avons ensuite regardé si nos données étaient balancées.
 \vspace{5mm}
 
@@ -85,12 +85,12 @@ Il a été intéressant de voir qu'il y a présence de débalancement (\hyperref
 Une fois les analyse de données terminées, nous avons dû faire quelques changements dans les données afin de pouvoir utiliser notre modèle. Nous avons en premier lieu, dû transformer les valeurs de X\_train (attributs) en float. Nous avons ensuite retirer les valeurs de \emph{ID} dans X\_train et y\_train. Nous pouvions ainsi entrainer notre modèle. Étant donné les mauvais résultats initiaux, nous avons dû faire appel à la normalisation. Nous sommes donc passées d'une précision de 0.268 à une de 0.933 sur le classificateur SVM. Le \emph{scaler} qui a donné les meilleurs résultats est le \emph{StandardScaler} de \emph{scikit-learn}.
 
 \section{Méthodologie}
-\label{sec:org7af4dea}
+\label{sec:org86a1795}
 Le classificateur que nous avons choisi (\emph{SVC}) est un classificateur binaire. Il était donc nécessaire de combiner ce classificateur avec une autre méthode. Nous avons alors choisi la méthode OneVsOne (/OneVsOneClassifier). En combinant ces deux algorithmes, nous obtenons un classificateur multiclasses qui est en fait composées de plusieurs classificateurs binaires. Dans notre cas, nous avons 7 * 6 / 2 = 21 classificateurs binaires au total.
 
 En ce qui concerne la répartition des données, nous avons utilisé l'intégralité des données pour tester notre modèle. Nous avons pris cette décision, car nous avons utilisé en parallèle la méthode de vérification \emph{k-fold cross-validation} avec k = 10. Ainsi, les données sont diviser en 10 parties dont 9 sont utilisées pour l'entraînement et la dernière comme partie de validation.
 
-Comme nous pouvons le voir à la figure \hyperref[fig:barchart]{figure 1}, nos données étaient assez déséquilibrées. Nous avons fait des recherches à ce sujet et il y avait plusieurs solutions possibles. Il y avait la possibilité de faire du \emph{oversampling} et du \emph{undersampling}. Nous n'avons malheureusement pas eu de succès avec ces deux méthodes. Étant donné que nous avons utilisés le modèle \emph{SVC} de scikit-learn, nous avions accès à l'hyperparamètre \emph{class\textsubscript{weight}} avec comme valeur \emph{balanced} qui associe un poids à chaque classe selon sa fréquence dans les données pour gérer les débalancements. Malheureusement cet hyperparamètre n'a pas impacté positivement nos résultats.
+Comme nous pouvons le voir à la figure \hyperref[fig:barchart]{figure 1}, nos données étaient assez déséquilibrées. Nous avons fait des recherches à ce sujet et il y avait plusieurs solutions possibles. Il y avait la possibilité de faire du \emph{oversampling} et du \emph{undersampling}. Nous n'avons malheureusement pas eu de succès avec ces deux méthodes. Étant donné que nous avons utilisés le modèle \emph{SVC} de scikit-learn, nous avions accès à l'hyperparamètre \emph{class\_weight} avec comme valeur \emph{balanced} qui associe un poids à chaque classe selon sa fréquence dans les données pour gérer les débalancements. Malheureusement cet hyperparamètre n'a pas impacté positivement nos résultats.
 
 Le modèle que nous avons utilisé est basé sur les machines à vecteurs de support et il y a deux paramètres principaux à tenir en compte, \emph{C} et \emph{gamma}. D'abord il est utile de comprendre que ce modèle classifie les données de façon linéaire, ensuite que pour classifier des données de non linéaires, la méthode utilise une fonction appelé noyau (\emph{kernel}). La valeur du gamma détermine à quel point les points proches et loin de la délimitation ont de l'importance. En d'autres mots, des valeurs élevées de gamma auront une meilleure délimitation, avec plus de courbatures, entre les données et donc le modèle aura plus tendance à souffrir de sur-apprentissage. À l'inverse, des
 \begin{minipage}{.45\textwidth}
@@ -109,7 +109,7 @@ valeurs faibles de gamma nous mèneront plus vers un problème de sous-apprentis
 
 
 \section{Résultats}
-\label{sec:org4404d19}
+\label{sec:orgefef4bc}
 Nous avons pris notre décision sur le classificateur avant tout selon la précision avec les hyperparamètres par défauts. Le \hyperref[classificators]{tableau 1} montre les résultats des 3 classificateurs testés avec leurs hyperparamètres par défaut.
 \vspace{2mm}
 \captionof{table}{Comparaison des classificateurs testés avec k-fold cross-validation k=10}
@@ -158,7 +158,7 @@ Normalizer & 0.263 & 0.263 & 0.263 & 0.265 & 0.265 & 0.265 & 0.265 & 0.265 & 0.2
 }
 
 \section{Discussion}
-\label{sec:orgcdf2b0b}
+\label{sec:orgc899211}
 \setlength\parindent{20pt}Les modèle que nous avons testés étaient tous simple d'implémentation avec \emph{scikit-learn}. Ce qui était un peu plus difficile était d'ajuster les différents paramètres et de normaliser correctement les données, afin d'avoir un résultat optimal. Nous sommes assez satisfaits des résultats de notre modèle qui, sur kaggle donne une précision de \textbf{0.932}. En théorie, le modèle SVM est susceptible aux grands débalancements des données. Malgré cela, ne pas en tenir compte s'est avéré être le plus bénéfique pour nous. Le modèle SVM n'est aussi pas optimales pour gérer une grande quantité de données tests. En effet, SVM utilise une matrice noyau dont la taille est proportionnelle à la quantité de données test ce qui affecte les performances.
 
 Il y a tout de même plusieurs avantages à utiliser le modèle SVM, notamment, l'utilisateur a beaucoup de contrôle sur celui-ci. Il y a d'abord les paramètres \emph{gamma} et \emph{C} qui permet à l'utilisateur de gérer le sur-apprentissage. Mais il y a surtout le paramètre \emph{kernel} qui permet à l'utilisateur d'utiliser sa propre matrice pour un utilisateur qui aurait des connaissances expertes sur ses données \cite{sklearn}.
