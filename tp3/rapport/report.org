@@ -50,10 +50,10 @@ Le \today
 
 
 * Contexte
-Dans ce travail pratique, il nous était demandé de classifier des légumes secs dans leurs catégorie respectives. Il y en avait 7 en tout ; Sira, Horoz, Dermason, Barbunya, Cali, Bombay, Seker et nous devions déterminer la catégorie à l'aide de 16 /features/. Nous avions donc à résoudre un problème de classification multiclasses. Nous avons décidé d'utiliser la librairie /scikit-learn/ et le modèle que nous avons utilisé se base sur les machines à vecteurs de support (/SVC OneVsOneClassifier/). Nous avons aussi exploré d'autres modèles telles que celui basée sur la descente de gradient stochastique (/SGDClassifier/) et celle basée sur les forêts aléatoires (/RandomForestClassifier/)
+Dans ce travail pratique, il nous était demandé de classifier des légumes secs dans leurs catégorie respectives. Il y en avait 7 en tout ; Sira, Horoz, Dermason, Barbunya, Cali, Bombay, Seker et nous devions déterminer la catégorie à l'aide de 16 /features/. Nous avions donc à résoudre un problème de classification multiclasses. Nous avons décidé d'utiliser la librairie /scikit-learn/ et le modèle que nous avons utilisé se base sur les machines à vecteurs de support (/SVC OneVsOneClassifier/). Nous avons aussi exploré d'autres modèles tels que celui basée sur la descente de gradient stochastique (/SGDClassifier/) et celle basée sur les forêts aléatoires (/RandomForestClassifier/)
 
 * Prétraitement
-Avant de commencer à résoudre le problème, il est utile de se familiariser avec les données. Nos données étaient constituées de 16 /features/. Il y avait 6000 données de test. Nous avons commencé par voir s'il manquait des valeurs dans certaines de no données test ce qui n'était pas le cas. Nous avons ensuite regardé si nos données étaient balancées.
+Avant de commencer à résoudre le problème, il est utile de se familiariser avec les données. Nos données étaient constituées de 16 /features/. Il y avait 6000 données de test. Nous avons commencé par voir s'il manquait des valeurs dans certaines de nos données test ce qui n'était pas le cas. Nous avons ensuite regardé si nos données étaient balancées.
 \vspace{5mm}
 
 #+attr_latex: :options {.45\textwidth}
@@ -160,7 +160,7 @@ Nous avons pris notre décision sur le classificateur avant tout selon la préci
 #+latex: }
 \setlength\parindent{20pt}Nous voyons qu'avec les hyperparamètres par défauts, c'est bien le classificateur SVC qui donne les meilleurs résultats.
 
-Finalement, nous avons optimisé notre classificateur avec /gamma/ = 0.19 et /C/ = 2.8 et avons comparé les différents /scalers/. Le [[scalers][Tableau 2]] montre les résultats sur les différents scalers testés.
+Finalement, nous avons optimisé notre classificateur avec /gamma/ = 0.19 et /C/ = 2.8 et avons comparé les différents /scalers/. Le [[scalers][tableau 2]] montre les résultats sur les différents scalers testés.
 \vspace{2mm}
 \captionof{table}{Comparaison des scalers testés avec k-fold cross-validation k=10}
 \vspace*{-5mm}
